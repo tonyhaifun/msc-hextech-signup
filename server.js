@@ -424,6 +424,28 @@ async function handleApi(req, res, pathname) {
       return;
     }
 
+    if (req.method === "POST" && pathname === "/api/admin/delete") {
+      if (!isAuthed(req)) {
+        sendJson(res, 401, { ok: false, message: "\u8bf7\u5148\u767b\u5f55\u540e\u53f0" });
+        return;
+      }
+      const body = await readBody(req);
+      const id = cleanText(body.id, 120);
+      if (!id) {
+        sendJson(res, 400, { ok: false, message: "\u8bf7\u9009\u62e9\u8981\u5220\u9664\u7684\u62a5\u540d\u8bb0\u5f55" });
+        return;
+      }
+      const items = await readSignups();
+      const nextItems = items.filter((item) => item.id !== id);
+      if (nextItems.length === items.length) {
+        sendJson(res, 404, { ok: false, message: "\u6ca1\u6709\u627e\u5230\u8fd9\u6761\u62a5\u540d\u8bb0\u5f55" });
+        return;
+      }
+      await writeSignups(nextItems);
+      sendJson(res, 200, { ok: true, deletedId: id, count: nextItems.length });
+      return;
+    }
+
     if (pathname === "/api/admin/download.csv") {
       if (!isAuthed(req)) {
         send(res, 401, "\u8bf7\u5148\u767b\u5f55\u540e\u53f0", { "Content-Type": "text/plain; charset=utf-8" });
