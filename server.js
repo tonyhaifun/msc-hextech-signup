@@ -9,8 +9,8 @@ const PORT = Number(process.env.PORT || 4173);
 const HOST = process.env.HOST || "0.0.0.0";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const ROOT = __dirname;
-const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
-const DATA_FILE = path.join(DATA_DIR, "signups.json");
+let DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
+let DATA_FILE = path.join(DATA_DIR, "signups.json");
 const sessions = new Map();
 const attempts = new Map();
 
@@ -51,7 +51,14 @@ function sendJson(res, status, payload) {
 }
 
 async function ensureStore() {
-  await fsp.mkdir(DATA_DIR, { recursive: true });
+  try {
+    await fsp.mkdir(DATA_DIR, { recursive: true });
+  } catch (error) {
+    if (!["EACCES", "EROFS", "EPERM"].includes(error.code)) throw error;
+    DATA_DIR = path.join(os.tmpdir(), "msc-signup-data");
+    DATA_FILE = path.join(DATA_DIR, "signups.json");
+    await fsp.mkdir(DATA_DIR, { recursive: true });
+  }
   try {
     await fsp.access(DATA_FILE);
   } catch {
