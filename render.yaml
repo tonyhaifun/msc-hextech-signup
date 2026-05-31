@@ -9,10 +9,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATA_DIR
-        value: /var/data
+        value: /tmp/msc-signup-data
       - key: ADMIN_PASSWORD
         sync: false
-    disk:
-      name: signup-data
-      mountPath: /var/data
-      sizeGB: 1
