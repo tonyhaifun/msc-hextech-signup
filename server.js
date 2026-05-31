@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const PORT = Number(process.env.PORT || 4173);
 const HOST = process.env.HOST || "0.0.0.0";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+const TENCENT_DOCS_WEBHOOK_URL = process.env.TENCENT_DOCS_WEBHOOK_URL || "";
 const ROOT = __dirname;
 let DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
 let DATA_FILE = path.join(DATA_DIR, "signups.json");
@@ -209,6 +210,46 @@ function toCsv(items) {
   return "\uFEFF" + [header, ...rows].map((row) => row.map(csvValue).join(",")).join("\n");
 }
 
+function flattenSignup(signup) {
+  return {
+    id: signup.id,
+    createdAt: signup.createdAt,
+    createdAtText: signup.createdAtText,
+    signupType: signup.signupType,
+    teamName: signup.teamName,
+    captainName: signup.captainName,
+    contact: signup.contact,
+    mainPosition: signup.mainPosition,
+    canBeAssigned: signup.canBeAssigned,
+    membersText: (signup.members || []).map((member, index) => `${index + 1}. ${member.gameId || "-"} (${member.role || "N/A"})`).join("; "),
+    substitute: signup.substitute,
+    notes: signup.notes
+  };
+}
+
+async function syncSignup(signup) {
+  if (!TENCENT_DOCS_WEBHOOK_URL) return { enabled: false };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(TENCENT_DOCS_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(flattenSignup(signup)),
+      signal: controller.signal
+    });
+    const text = await response.text();
+    if (!response.ok) {
+      return { enabled: true, ok: false, status: response.status, body: text.slice(0, 300) };
+    }
+    return { enabled: true, ok: true, status: response.status };
+  } catch (error) {
+    return { enabled: true, ok: false, error: error.message };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function serveStatic(req, res, pathname) {
   const requested = pathname === "/" ? "/index.html" : pathname;
   const filePath = path.normalize(path.join(ROOT, decodeURIComponent(requested)));
@@ -243,7 +284,8 @@ async function handleApi(req, res, pathname) {
       const items = await readSignups();
       items.unshift(signup);
       await writeSignups(items);
-      sendJson(res, 201, { ok: true, id: signup.id });
+      const sync = await syncSignup(signup);
+      sendJson(res, 201, { ok: true, id: signup.id, sync });
       return;
     }
 
