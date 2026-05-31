@@ -9,11 +9,16 @@ const PORT = Number(process.env.PORT || 4173);
 const HOST = process.env.HOST || "0.0.0.0";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const TENCENT_DOCS_WEBHOOK_URL = process.env.TENCENT_DOCS_WEBHOOK_URL || "";
+const FEISHU_APP_ID = process.env.FEISHU_APP_ID || "";
+const FEISHU_APP_SECRET = process.env.FEISHU_APP_SECRET || "";
+const FEISHU_BITABLE_APP_TOKEN = process.env.FEISHU_BITABLE_APP_TOKEN || "";
+const FEISHU_TABLE_ID = process.env.FEISHU_TABLE_ID || "";
 const ROOT = __dirname;
 let DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
 let DATA_FILE = path.join(DATA_DIR, "signups.json");
 const sessions = new Map();
 const attempts = new Map();
+let feishuTokenCache = null;
 
 const TEAM = "\u961f\u4f0d\u62a5\u540d";
 const SOLO = "\u4e2a\u4eba\u62a5\u540d";
@@ -228,7 +233,17 @@ function flattenSignup(signup) {
 }
 
 async function syncSignup(signup) {
-  if (!TENCENT_DOCS_WEBHOOK_URL) return { enabled: false };
+  const result = {};
+  if (TENCENT_DOCS_WEBHOOK_URL) {
+    result.webhook = await syncWebhook(signup);
+  }
+  if (feishuEnabled()) {
+    result.feishu = await syncFeishu(signup);
+  }
+  return Object.keys(result).length ? result : { enabled: false };
+}
+
+async function syncWebhook(signup) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
@@ -243,6 +258,81 @@ async function syncSignup(signup) {
       return { enabled: true, ok: false, status: response.status, body: text.slice(0, 300) };
     }
     return { enabled: true, ok: true, status: response.status };
+  } catch (error) {
+    return { enabled: true, ok: false, error: error.message };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function feishuEnabled() {
+  return Boolean(FEISHU_APP_ID && FEISHU_APP_SECRET && FEISHU_BITABLE_APP_TOKEN && FEISHU_TABLE_ID);
+}
+
+async function getFeishuTenantAccessToken() {
+  const now = Date.now();
+  if (feishuTokenCache && feishuTokenCache.expiresAt > now + 60 * 1000) {
+    return feishuTokenCache.token;
+  }
+
+  const response = await fetch("https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      app_id: FEISHU_APP_ID,
+      app_secret: FEISHU_APP_SECRET
+    })
+  });
+  const data = await response.json();
+  if (!response.ok || data.code !== 0) {
+    throw new Error(`Feishu token error: ${data.msg || response.status}`);
+  }
+
+  feishuTokenCache = {
+    token: data.tenant_access_token,
+    expiresAt: now + Math.max(60, Number(data.expire || 7200) - 60) * 1000
+  };
+  return feishuTokenCache.token;
+}
+
+function feishuFields(signup) {
+  const flat = flattenSignup(signup);
+  return {
+    "\u62a5\u540d\u7f16\u53f7": flat.id,
+    "\u63d0\u4ea4\u65f6\u95f4": flat.createdAtText,
+    "\u62a5\u540d\u7c7b\u578b": flat.signupType,
+    "\u961f\u4f0d\u540d": flat.teamName,
+    "\u8054\u7cfb\u4eba": flat.captainName,
+    "\u8054\u7cfb\u65b9\u5f0f": flat.contact,
+    "\u5e38\u7528\u4f4d\u7f6e": flat.mainPosition,
+    "\u63a5\u53d7\u62fc\u961f": flat.canBeAssigned,
+    "\u961f\u5458\u4fe1\u606f": flat.membersText,
+    "\u66ff\u8865\u4fe1\u606f": flat.substitute,
+    "\u5907\u6ce8": flat.notes
+  };
+}
+
+async function syncFeishu(signup) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const token = await getFeishuTenantAccessToken();
+    const appToken = encodeURIComponent(FEISHU_BITABLE_APP_TOKEN);
+    const tableId = encodeURIComponent(FEISHU_TABLE_ID);
+    const response = await fetch(`https://open.feishu.cn/open-apis/bitable/v1/apps/${appToken}/tables/${tableId}/records`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ fields: feishuFields(signup) }),
+      signal: controller.signal
+    });
+    const data = await response.json();
+    if (!response.ok || data.code !== 0) {
+      return { enabled: true, ok: false, status: response.status, code: data.code, message: data.msg };
+    }
+    return { enabled: true, ok: true, recordId: data.data && data.data.record && data.data.record.record_id };
   } catch (error) {
     return { enabled: true, ok: false, error: error.message };
   } finally {
