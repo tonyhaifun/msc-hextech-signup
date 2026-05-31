@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MSC Signup</title>
+  <style>
+    :root{color-scheme:dark;--bg:#070914;--panel:rgba(14,20,38,.88);--text:#f5f8ff;--muted:#b8c7d8;--cyan:#4fd5ff;--gold:#f3c663;--green:#61e6a4;--red:#ff7676}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",Arial,sans-serif;color:var(--text);background:linear-gradient(180deg,#070914,#0b1020 58%,#070914)}
+    a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}.nav{position:fixed;z-index:20;inset:0 0 auto;min-height:86px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px clamp(18px,5vw,64px);background:linear-gradient(180deg,rgba(7,9,20,.96),rgba(7,9,20,.48));border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(16px)}
+    .brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;padding:4px;border-radius:50%;background:#fff;object-fit:contain}.mark{width:58px;height:58px;display:grid;place-items:center;color:#07101b;font-weight:900;background:linear-gradient(135deg,var(--cyan),var(--gold));clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)}.brand strong{display:block;font-size:clamp(24px,2.5vw,34px)}.brand span span{color:var(--muted);font-size:13px;font-weight:700}.links{display:flex;gap:24px;color:var(--muted);font-size:14px}.links a:hover{color:var(--cyan)}
+    .hero{position:relative;min-height:92vh;display:grid;align-items:center;padding:132px clamp(20px,6vw,88px) 76px;overflow:hidden}.hero:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(7,9,20,.94),rgba(7,9,20,.58),rgba(7,9,20,.78)),url("assets/hextech-hero.png") center/cover;transform:scale(1.02)}.hero:after{content:"";position:absolute;inset:auto 0 0;height:34%;z-index:-1;background:linear-gradient(180deg,transparent,var(--bg))}
+    .hero-content{width:min(780px,100%)}.eyebrow{color:var(--gold);font-weight:900}.hero h1{max-width:11em;margin:18px 0 0;font-size:clamp(44px,9vw,108px);line-height:.96;text-shadow:0 8px 34px rgba(0,0,0,.58)}.copy{width:min(680px,100%);color:#dce9ff;font-size:clamp(16px,2vw,21px);line-height:1.78}.pills{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}.pills li{padding:8px 12px;border-radius:999px;color:#07101b;background:linear-gradient(135deg,var(--gold),var(--cyan));font-weight:900}.actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px}.btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 22px;border:1px solid rgba(255,255,255,.2);border-radius:6px;color:var(--text);background:rgba(255,255,255,.07);cursor:pointer;font-weight:900}.btn-primary{color:#07101b;border-color:transparent;background:linear-gradient(135deg,var(--gold),#fff2a8 46%,var(--cyan))}
+    section{padding:clamp(56px,8vw,100px) clamp(20px,6vw,88px)}.head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:30px}.head h2{margin:0;font-size:clamp(28px,4.2vw,52px);line-height:1.1}.head p{width:min(600px,100%);margin:0;color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.card{min-height:190px;padding:24px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035))}.card h3{margin:0 0 12px;color:var(--gold);font-size:22px}.card p{margin:0;color:var(--muted);line-height:1.75}
+    .signup{display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:start}.signup h2{margin:0 0 18px;font-size:clamp(34px,5vw,64px);line-height:1.06}.signup p{color:var(--muted);line-height:1.85;font-size:17px}.tip{margin-top:18px;padding:18px;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;color:#dce9ff;background:rgba(243,198,99,.09);line-height:1.75}.box{padding:30px;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(20,27,47,.94);box-shadow:0 22px 70px rgba(0,0,0,.42)}.form{display:grid;gap:18px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:grid;gap:8px}.field.full{grid-column:1/-1}label{color:#dce9ff;font-size:14px;font-weight:900}input,select,textarea{width:100%;min-height:46px;padding:11px 13px;color:var(--text);border:1px solid rgba(255,255,255,.14);border-radius:6px;outline:none;background:rgba(4,8,18,.74)}textarea{min-height:96px;resize:vertical}.members{display:grid;gap:10px}.member-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.note,.status{margin:0;color:var(--muted);font-size:13px;line-height:1.7}.status.ok{color:var(--green)}.status.error{color:var(--red)}
+    footer{display:flex;justify-content:space-between;gap:16px;padding:28px clamp(20px,6vw,88px);color:rgba(244,247,255,.64);border-top:1px solid rgba(255,255,255,.1);font-size:14px}footer a{color:var(--cyan)}
+    @media(max-width:900px){.links{display:none}.grid,.signup{grid-template-columns:1fr}.form-grid,.member-row{grid-template-columns:1fr}.head{display:grid}.actions .btn,.form .btn{width:100%}.logo{display:none}footer{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    const TEAM = "\u961f\u4f0d\u62a5\u540d";
+    const SOLO = "\u4e2a\u4eba\u62a5\u540d";
+    document.title = "MSC \u5b9e\u9a8c\u5ba4\u6d77\u514b\u65af\u5927\u4e71\u6597\u62a5\u540d";
+    document.querySelector("#app").innerHTML = `
+      <nav class="nav">
+        <a class="brand" href="#top"><img class="logo" src="assets/seu-logo.jpg" alt="SEU"><span class="mark">MSC</span><span><strong>MSC LAB</strong><span>\u4e1c\u5357\u5927\u5b66 \u00b7 \u673a\u7535\u63a7\u5236\u7cfb\u7edf\u5b9e\u9a8c\u5ba4</span></span></a>
+        <div class="links"><a href="#highlights">\u8d5b\u4e8b\u4eae\u70b9</a><a href="#principles">\u6d3b\u52a8\u539f\u5219</a><a href="#signup">\u62a5\u540d</a><a href="/admin.html">\u540e\u53f0</a></div>
+      </nav>
+      <header class="hero" id="top"><div class="hero-content">
+        <p class="eyebrow">\u4e1c\u5357\u5927\u5b66\u673a\u7535\u63a7\u5236\u7cfb\u7edf\u5b9e\u9a8c\u5ba4 \u00b7 MSC \u5185\u90e8\u5a31\u4e50\u8d5b</p>
+        <h1>\u5ce1\u8c37\u96c6\u7ed3\uff0c\u5f00\u5c40\u5c31\u5f00\u56e2</h1>
+        <p class="copy">\u82f1\u96c4\u8054\u76df\u6d77\u514b\u65af\u5927\u4e71\u6597\u5185\u90e8\u6bd4\u8d5b\u5f00\u542f\u62db\u52df\u3002\u53cb\u8c0a\u7b2c\u4e00\uff0c\u6bd4\u8d5b\u7b2c\u4e8c\uff0c\u7eaf\u7cb9\u5a31\u4e50\u3002\u5e0c\u671b\u5927\u5bb6\u5408\u7406\u7ec4\u961f\uff0c\u4e0d\u8981\u628a\u7279\u522b\u4f1a\u73a9\u7684\u540c\u5b66\u90fd\u653e\u5728\u4e00\u961f\u3002</p>
+        <ul class="pills"><li>\u53cb\u8c0a\u7b2c\u4e00</li><li>\u6bd4\u8d5b\u7b2c\u4e8c</li><li>\u5408\u7406\u7ec4\u961f</li><li>\u5feb\u4e50\u4f18\u5148</li></ul>
+        <div class="actions"><a class="btn btn-primary" href="#signup">\u7acb\u5373\u62a5\u540d</a><a class="btn" href="/admin.html">\u8fdb\u5165\u540e\u53f0</a></div>
+      </div></header>
+      <section id="highlights"><div class="head"><h2>\u4e00\u573a\u5c5e\u4e8e\u5b9e\u9a8c\u5ba4\u7684\u5ce1\u8c37\u591c</h2><p>\u8f7b\u7ade\u6280\u3001\u5f3a\u4e92\u52a8\u3001\u4f4e\u95e8\u69db\u3002\u65b0\u624b\u548c\u8001\u73a9\u5bb6\u90fd\u53ef\u4ee5\u53c2\u4e0e\u3002</p></div><div class="grid">
+        <article class="card"><h3>\u968f\u673a\u82f1\u96c4</h3><p>\u5c11\u4e00\u70b9\u5957\u8def\uff0c\u591a\u4e00\u70b9\u60ca\u559c\u3002</p></article>
+        <article class="card"><h3>\u5feb\u901f\u5f00\u56e2</h3><p>\u4ece\u7b2c\u4e00\u5206\u949f\u5f00\u59cb\u62c9\u6ee1\u64cd\u4f5c\u548c\u8282\u76ee\u6548\u679c\u3002</p></article>
+        <article class="card"><h3>\u5185\u90e8\u8363\u8a89</h3><p>\u51a0\u519b\u3001MVP\u3001\u6700\u4f73\u6574\u6d3b\u7b49\u5956\u9879\u90fd\u53ef\u4ee5\u6709\u3002</p></article>
+      </div></section>
+      <section id="principles"><div class="head"><h2>\u8ba4\u771f\u6574\u6d3b\uff0c\u8f7b\u677e\u6bd4\u8d5b</h2><p>\u8fd9\u4e0d\u662f\u538b\u529b\u5c40\uff0c\u800c\u662f\u5b9e\u9a8c\u5ba4\u5185\u90e8\u653e\u677e\u6d3b\u52a8\u3002</p></div><div class="grid">
+        <article class="card"><h3>\u53cb\u8c0a\u7b2c\u4e00</h3><p>\u8f93\u8d62\u90fd\u7b97\u6545\u4e8b\uff0c\u961f\u53cb\u548c\u5bf9\u624b\u90fd\u662f\u5b9e\u9a8c\u5ba4\u540c\u5b66\u3002</p></article>
+        <article class="card"><h3>\u5408\u7406\u7ec4\u961f</h3><p>\u5efa\u8bae\u5f3a\u5f31\u642d\u914d\uff0c\u5c3d\u91cf\u907f\u514d\u9ad8\u624b\u96c6\u4e2d\u5728\u4e00\u961f\u3002</p></article>
+        <article class="card"><h3>\u4eab\u53d7\u4e50\u8da3</h3><p>\u6b22\u8fce\u4e2a\u4eba\u62a5\u540d\u3001\u6b22\u8fce\u65b0\u624b\u53c2\u4e0e\uff0c\u62d2\u7edd\u538b\u529b\u961f\u5185\u8bed\u97f3\u3002</p></article>
+      </div></section>
+      <section class="signup" id="signup"><div><h2>\u62a5\u540d\u5165\u53e3\u5df2\u7ecf\u5f00\u623f\u95f4</h2><p>\u586b\u5199\u540e\u4f1a\u81ea\u52a8\u4fdd\u5b58\u5230\u540e\u53f0\uff0c\u7ec4\u7ec7\u65b9\u53ef\u4ee5\u4e0b\u8f7d\u5168\u90e8\u62a5\u540d\u4fe1\u606f\u3002</p><div class="tip">\u7ec4\u961f\u5efa\u8bae\uff1a\u8fd9\u6b21\u6d3b\u52a8\u4ee5\u5a31\u4e50\u548c\u4ea4\u6d41\u4e3a\u4e3b\uff0c\u9f13\u52b1\u5747\u8861\u5b9e\u529b\u3002</div></div>
+      <div class="box"><form class="form" id="signupForm"><div class="form-grid">
+        <div class="field"><label>\u62a5\u540d\u7c7b\u578b</label><select id="signupType" name="signupType"><option value="${TEAM}">${TEAM}</option><option value="${SOLO}">${SOLO}</option></select></div>
+        <div class="field"><label>\u961f\u4f0d\u540d</label><input id="teamName" name="teamName" placeholder="\u4f8b\u5982\uff1a\u6d77\u514b\u65af\u6253\u5de5\u4eba"></div>
+        <div class="field"><label>\u8054\u7cfb\u4eba\u59d3\u540d</label><input name="captainName" required></div>
+        <div class="field"><label>\u8054\u7cfb\u65b9\u5f0f</label><input name="contact" placeholder="\u5fae\u4fe1 / QQ / \u624b\u673a" required></div>
+        <div class="field"><label>\u5e38\u7528\u4f4d\u7f6e</label><input name="mainPosition" placeholder="\u4e0a / \u91ce / \u4e2d / \u4e0b / \u8f85 / \u90fd\u884c"></div>
+        <div class="field"><label>\u662f\u5426\u63a5\u53d7\u62fc\u961f</label><select name="canBeAssigned"><option value="\u662f">\u662f</option><option value="\u5426">\u5426</option></select></div>
+        <div class="field full"><label>\u961f\u5458\u4fe1\u606f</label><div class="members">${[1,2,3,4,5].map(i=>`<div class="member-row"><input name="memberName" placeholder="\u961f\u5458 ${i} \u6e38\u620f ID"><input name="memberRole" placeholder="\u5e38\u7528\u4f4d\u7f6e"></div>`).join("")}</div><p class="note">\u4e2a\u4eba\u62a5\u540d\u53ef\u53ea\u586b\u7b2c 1 \u884c\uff1b\u961f\u4f0d\u62a5\u540d\u5efa\u8bae\u586b\u6ee1 5 \u884c\u3002</p></div>
+        <div class="field full"><label>\u66ff\u8865\u4fe1\u606f</label><input name="substitute"></div>
+        <div class="field full"><label>\u5907\u6ce8</label><textarea name="notes" placeholder="\u53ef\u586b\u5199\u53ef\u53c2\u8d5b\u65f6\u95f4\u3001\u6bb5\u4f4d\u60c5\u51b5\u7b49"></textarea></div>
+      </div><button class="btn btn-primary" type="submit">\u63d0\u4ea4\u62a5\u540d</button><p class="status" id="formStatus"></p></form></div></section>
+      <footer><span>\u4e1c\u5357\u5927\u5b66\u673a\u7535\u63a7\u5236\u7cfb\u7edf\u5b9e\u9a8c\u5ba4 MSC \u5185\u90e8\u6d3b\u52a8\u5ba3\u4f20\u9875</span><a href="/admin.html">\u540e\u53f0\u7ba1\u7406</a></footer>`;
+
+    const form = document.querySelector("#signupForm");
+    const statusBox = document.querySelector("#formStatus");
+    const typeSelect = document.querySelector("#signupType");
+    const teamName = document.querySelector("#teamName");
+    function setStatus(message, kind = "") { statusBox.textContent = message; statusBox.className = `status ${kind}`; }
+    function syncSignupType() { const solo = typeSelect.value === SOLO; teamName.required = !solo; teamName.placeholder = solo ? "\u4e2a\u4eba\u62a5\u540d\u53ef\u4e0d\u586b" : "\u4f8b\u5982\uff1a\u6d77\u514b\u65af\u6253\u5de5\u4eba"; }
+    typeSelect.addEventListener("change", syncSignupType); syncSignupType();
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault(); setStatus("\u6b63\u5728\u63d0\u4ea4\u62a5\u540d\u4fe1\u606f...");
+      const memberNames = [...form.querySelectorAll('input[name="memberName"]')];
+      const memberRoles = [...form.querySelectorAll('input[name="memberRole"]')];
+      const members = memberNames.map((input, index) => ({ gameId: input.value.trim(), role: memberRoles[index].value.trim() })).filter((member) => member.gameId || member.role);
+      const payload = { signupType: form.signupType.value, teamName: form.teamName.value.trim(), captainName: form.captainName.value.trim(), contact: form.contact.value.trim(), mainPosition: form.mainPosition.value.trim(), canBeAssigned: form.canBeAssigned.value, members, substitute: form.substitute.value.trim(), notes: form.notes.value.trim() };
+      try {
+        const response = await fetch("/api/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "\u63d0\u4ea4\u5931\u8d25");
+        form.reset(); syncSignupType(); setStatus(`\u62a5\u540d\u6210\u529f\uff01\u62a5\u540d\u7f16\u53f7\uff1a${result.id}`, "ok");
+      } catch (error) { setStatus(`\u63d0\u4ea4\u5931\u8d25\uff1a${error.message}`, "error"); }
+    });
+  </script>
+</body>
+</html>

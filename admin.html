@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MSC Admin</title>
+  <style>
+    :root{color-scheme:dark;--bg:#070914;--panel:rgba(20,27,47,.94);--text:#f4f7ff;--muted:#b6c5d8;--cyan:#4fd5ff;--gold:#f3c663;--green:#61e6a4;--red:#ff7676}
+    *{box-sizing:border-box}body{margin:0;font-family:"Microsoft YaHei","PingFang SC","Noto Sans SC",Arial,sans-serif;color:var(--text);background:linear-gradient(90deg,rgba(7,9,20,.9),rgba(7,9,20,.72)),url("assets/hextech-hero.png") center/cover fixed,var(--bg)}a{color:inherit;text-decoration:none}button,input{font:inherit}.shell{width:min(1180px,calc(100% - 36px));margin:0 auto;padding:34px 0 60px}.panel{padding:clamp(22px,4vw,34px);border:1px solid rgba(255,255,255,.14);border-radius:8px;background:var(--panel);box-shadow:0 22px 70px rgba(0,0,0,.42);backdrop-filter:blur(14px)}.login{width:min(460px,100%);margin:12vh auto}.brand{display:flex;align-items:center;gap:12px;font-weight:900}.mark{width:42px;height:42px;display:grid;place-items:center;color:#06101a;background:linear-gradient(135deg,var(--cyan),var(--gold));clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)}h1,h2{margin:0;line-height:1.08}h1{font-size:clamp(32px,5vw,56px)}h2{margin-bottom:8px;font-size:26px}p{color:var(--muted);line-height:1.75}label{display:block;margin:22px 0 8px;color:#dce9ff;font-weight:900}input{width:100%;min-height:46px;padding:11px 13px;color:var(--text);border:1px solid rgba(255,255,255,.14);border-radius:6px;outline:none;background:rgba(4,8,18,.74)}.actions{display:flex;flex-wrap:wrap;gap:10px}.btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;border:1px solid rgba(255,255,255,.18);border-radius:6px;color:var(--text);background:rgba(255,255,255,.08);cursor:pointer;font-weight:900}.btn-primary{color:#07101b;border-color:transparent;background:linear-gradient(135deg,var(--gold),#fff2a8 46%,var(--cyan))}.status{min-height:24px;margin:14px 0 0;color:var(--muted)}.status.ok{color:var(--green)}.status.error{color:var(--red)}.hidden{display:none}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:24px 0}.stat{padding:20px;border:1px solid rgba(144,211,255,.24);border-radius:8px;background:rgba(255,255,255,.07)}.stat span{color:var(--muted);font-size:14px}.stat strong{display:block;margin-top:8px;color:var(--gold);font-size:34px;line-height:1}.table-wrap{overflow:auto;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(4,8,18,.58)}table{width:100%;min-width:980px;border-collapse:collapse;font-size:14px}th,td{padding:14px;border-bottom:1px solid rgba(255,255,255,.09);text-align:left;vertical-align:top}th{position:sticky;top:0;color:var(--gold);background:#0d1223;white-space:nowrap}td{color:#dce9ff;line-height:1.55}.empty{padding:36px;color:var(--muted);text-align:center}@media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}.actions,.actions .btn{width:100%}.summary{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="shell" id="app"></main>
+  <script>
+    const TEAM = "\u961f\u4f0d\u62a5\u540d";
+    const SOLO = "\u4e2a\u4eba\u62a5\u540d";
+    document.title = "MSC \u62a5\u540d\u540e\u53f0";
+    document.querySelector("#app").innerHTML = `
+      <section class="panel login" id="loginPanel">
+        <div class="brand"><span class="mark">M</span><span>MSC \u62a5\u540d\u540e\u53f0</span></div>
+        <h1>\u540e\u53f0\u767b\u5f55</h1>
+        <p>\u8f93\u5165\u7ba1\u7406\u5bc6\u7801\u540e\uff0c\u53ef\u4ee5\u67e5\u770b\u6240\u6709\u62a5\u540d\u4fe1\u606f\u5e76\u4e0b\u8f7d CSV \u8868\u683c\u3002</p>
+        <form id="loginForm"><label>\u7ba1\u7406\u5bc6\u7801</label><input name="password" type="password" autocomplete="current-password" required><div class="actions" style="margin-top:18px"><button class="btn btn-primary" type="submit">\u767b\u5f55\u540e\u53f0</button><a class="btn" href="/">\u8fd4\u56de\u524d\u53f0</a></div><p class="status" id="loginStatus"></p></form>
+      </section>
+      <section class="hidden" id="adminPanel">
+        <div class="topbar"><div><div class="brand"><span class="mark">M</span><span>MSC \u62a5\u540d\u540e\u53f0</span></div><h1>\u62a5\u540d\u4fe1\u606f\u7ba1\u7406</h1><p>\u8fd9\u91cc\u663e\u793a\u6240\u6709\u524d\u53f0\u63d0\u4ea4\u7684\u62a5\u540d\u4fe1\u606f\uff0c\u53ef\u968f\u65f6\u4e0b\u8f7d\u4e3a CSV\u3002</p></div><div class="actions"><a class="btn btn-primary" href="/api/admin/download.csv">\u4e0b\u8f7d\u5168\u90e8\u62a5\u540d</a><button class="btn" id="refreshBtn" type="button">\u5237\u65b0</button><button class="btn" id="logoutBtn" type="button">\u9000\u51fa\u767b\u5f55</button><a class="btn" href="/">\u8fd4\u56de\u524d\u53f0</a></div></div>
+        <div class="summary"><div class="stat"><span>\u62a5\u540d\u603b\u6570</span><strong id="totalCount">0</strong></div><div class="stat"><span>${TEAM}</span><strong id="teamCount">0</strong></div><div class="stat"><span>${SOLO}</span><strong id="soloCount">0</strong></div></div>
+        <div class="panel"><h2>\u62a5\u540d\u5217\u8868</h2><div class="table-wrap" id="tableWrap"><div class="empty">\u6b63\u5728\u8bfb\u53d6\u62a5\u540d\u4fe1\u606f...</div></div><p class="status" id="adminStatus"></p></div>
+      </section>`;
+
+    const loginPanel = document.querySelector("#loginPanel");
+    const adminPanel = document.querySelector("#adminPanel");
+    const loginForm = document.querySelector("#loginForm");
+    const loginStatus = document.querySelector("#loginStatus");
+    const adminStatus = document.querySelector("#adminStatus");
+    const tableWrap = document.querySelector("#tableWrap");
+    function setStatus(node, message, kind = "") { node.textContent = message; node.className = `status ${kind}`; }
+    function esc(value) { return String(value ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[c])); }
+    function showAdmin(){ loginPanel.classList.add("hidden"); adminPanel.classList.remove("hidden"); }
+    function showLogin(){ adminPanel.classList.add("hidden"); loginPanel.classList.remove("hidden"); }
+    function renderRows(items){
+      document.querySelector("#totalCount").textContent = items.length;
+      document.querySelector("#teamCount").textContent = items.filter(i => i.signupType === TEAM).length;
+      document.querySelector("#soloCount").textContent = items.filter(i => i.signupType === SOLO).length;
+      if(!items.length){ tableWrap.innerHTML = '<div class="empty">\u76ee\u524d\u8fd8\u6ca1\u6709\u62a5\u540d\u4fe1\u606f\u3002</div>'; return; }
+      const rows = items.map(item => {
+        const members = (item.members || []).map((m, i) => `${i + 1}. ${esc(m.gameId || "-")}\uff08${esc(m.role || "\u672a\u586b")}\uff09`).join("<br>");
+        return `<tr><td>${esc(item.createdAtText)}</td><td>${esc(item.signupType)}</td><td>${esc(item.teamName || "-")}</td><td>${esc(item.captainName)}</td><td>${esc(item.contact)}</td><td>${esc(item.mainPosition || "-")}</td><td>${esc(item.canBeAssigned || "-")}</td><td>${members || "-"}</td><td>${esc(item.substitute || "-")}</td><td>${esc(item.notes || "-")}</td></tr>`;
+      }).join("");
+      tableWrap.innerHTML = `<table><thead><tr><th>\u63d0\u4ea4\u65f6\u95f4</th><th>\u7c7b\u578b</th><th>\u961f\u4f0d\u540d</th><th>\u8054\u7cfb\u4eba</th><th>\u8054\u7cfb\u65b9\u5f0f</th><th>\u5e38\u7528\u4f4d\u7f6e</th><th>\u63a5\u53d7\u62fc\u961f</th><th>\u961f\u5458\u4fe1\u606f</th><th>\u66ff\u8865</th><th>\u5907\u6ce8</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+    async function loadSignups(){
+      setStatus(adminStatus, "\u6b63\u5728\u5237\u65b0...");
+      const response = await fetch("/api/admin/signups");
+      if(response.status === 401){ showLogin(); setStatus(loginStatus, "\u8bf7\u5148\u8f93\u5165\u5bc6\u7801\u767b\u5f55\u3002", "error"); return; }
+      const result = await response.json(); if(!response.ok) throw new Error(result.message || "\u8bfb\u53d6\u5931\u8d25");
+      showAdmin(); renderRows(result.items || []); setStatus(adminStatus, `\u5df2\u5237\u65b0\uff0c\u5171 ${result.items.length} \u6761\u62a5\u540d\u3002`, "ok");
+    }
+    loginForm.addEventListener("submit", async event => {
+      event.preventDefault(); setStatus(loginStatus, "\u6b63\u5728\u767b\u5f55...");
+      const password = new FormData(loginForm).get("password");
+      try {
+        const response = await fetch("/api/admin/login", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ password }) });
+        const result = await response.json(); if(!response.ok) throw new Error(result.message || "\u767b\u5f55\u5931\u8d25");
+        loginForm.reset(); setStatus(loginStatus, ""); await loadSignups();
+      } catch(error) { setStatus(loginStatus, error.message, "error"); }
+    });
+    document.querySelector("#refreshBtn").addEventListener("click", () => loadSignups().catch(e => setStatus(adminStatus, e.message, "error")));
+    document.querySelector("#logoutBtn").addEventListener("click", async () => { await fetch("/api/admin/logout", { method:"POST" }); showLogin(); setStatus(loginStatus, "\u5df2\u9000\u51fa\u767b\u5f55\u3002", "ok"); });
+    loadSignups().catch(() => showLogin());
+  </script>
+</body>
+</html>

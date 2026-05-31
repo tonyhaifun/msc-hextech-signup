@@ -1,0 +1,12 @@
+{
+  "name": "msc-hextech-signup",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MSC lab internal League of Legends ARAM signup site.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
