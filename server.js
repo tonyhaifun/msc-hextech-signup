@@ -88,6 +88,15 @@ async function writeSignups(items) {
   await fsp.writeFile(DATA_FILE, `${JSON.stringify(items, null, 2)}\n`, "utf8");
 }
 
+async function saveFeishuRecordId(signupId, recordId) {
+  if (!signupId || !recordId) return;
+  const items = await readSignups();
+  const item = items.find((entry) => entry.id === signupId);
+  if (!item) return;
+  item.feishuRecordId = recordId;
+  await writeSignups(items);
+}
+
 function parseCookies(req) {
   const cookies = {};
   const header = req.headers.cookie || "";
@@ -340,6 +349,37 @@ async function syncFeishu(signup) {
   }
 }
 
+async function deleteFeishuRecord(recordId) {
+  if (!feishuEnabled()) {
+    return { enabled: false, skipped: true };
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const token = await getFeishuTenantAccessToken();
+    const appToken = encodeURIComponent(FEISHU_BITABLE_APP_TOKEN);
+    const tableId = encodeURIComponent(FEISHU_TABLE_ID);
+    const encodedRecordId = encodeURIComponent(recordId);
+    const response = await fetch(`https://open.feishu.cn/open-apis/bitable/v1/apps/${appToken}/tables/${tableId}/records/${encodedRecordId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      signal: controller.signal
+    });
+    const data = await response.json();
+    if (!response.ok || data.code !== 0) {
+      return { enabled: true, ok: false, status: response.status, code: data.code, message: data.msg };
+    }
+    return { enabled: true, ok: true, recordId };
+  } catch (error) {
+    return { enabled: true, ok: false, error: error.message };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function serveStatic(req, res, pathname) {
   const requested = pathname === "/" ? "/index.html" : pathname;
   const filePath = path.normalize(path.join(ROOT, decodeURIComponent(requested)));
@@ -375,6 +415,9 @@ async function handleApi(req, res, pathname) {
       items.unshift(signup);
       await writeSignups(items);
       const sync = await syncSignup(signup);
+      if (sync.feishu && sync.feishu.ok && sync.feishu.recordId) {
+        await saveFeishuRecordId(signup.id, sync.feishu.recordId);
+      }
       sendJson(res, 201, { ok: true, id: signup.id, sync });
       return;
     }
@@ -436,13 +479,22 @@ async function handleApi(req, res, pathname) {
         return;
       }
       const items = await readSignups();
+      const item = items.find((entry) => entry.id === id);
       const nextItems = items.filter((item) => item.id !== id);
       if (nextItems.length === items.length) {
         sendJson(res, 404, { ok: false, message: "\u6ca1\u6709\u627e\u5230\u8fd9\u6761\u62a5\u540d\u8bb0\u5f55" });
         return;
       }
+      const sync = {};
+      if (item && item.feishuRecordId) {
+        sync.feishu = await deleteFeishuRecord(item.feishuRecordId);
+        if (!sync.feishu.ok) {
+          sendJson(res, 502, { ok: false, message: "\u98de\u4e66\u8868\u683c\u540c\u6b65\u5220\u9664\u5931\u8d25\uff0c\u540e\u53f0\u8bb0\u5f55\u5df2\u4fdd\u7559", sync });
+          return;
+        }
+      }
       await writeSignups(nextItems);
-      sendJson(res, 200, { ok: true, deletedId: id, count: nextItems.length });
+      sendJson(res, 200, { ok: true, deletedId: id, count: nextItems.length, sync });
       return;
     }
 
